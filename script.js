@@ -114,6 +114,15 @@ function loadMorePokemon() {
     }
 }
 
+// Füge ein Event-Listener für das Scrollen hinzu
+window.addEventListener('scroll', () => {
+    // Überprüfe, ob der Benutzer zum unteren Rand der Seite gescrollt hat
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+        // Wenn ja, lade mehr Pokémon
+        loadMorePokemon();
+    }
+});
+
 function showPokemonCard(index) {
     let selectedPokemon;
     if (searchedPokemon.length > 0) {
