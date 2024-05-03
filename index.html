@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="./img/pokeball-fav.png">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script src="chart.js"></script>
+    <script src="script.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">      
+    <title>Pokédex</title>
+</head>
+<body onload="init();">
+    <div id="loader" class="loaderContainer" style="display: flex;">
+        <h1>LOADING...</h1>
+        <div class="loader"></div>
+    </div>
+    <div id="showPokemonCardContainer" class="showPokemonCardContainer"></div>
+    <a href="index.html" class="headImage"><img src="img/pokedex.png"></a>
+    <input id="searchPokemon" class="searchPokemon" type="text" oninput="searchPokemon()" placeholder="SEARCH POKÉMON">
+    <div id="pokemonCardContainer" class="pokemonCardContainer"></div>
+    <button id="loadMoreButton" class="loadMoreButton" onclick="loadMorePokemon()">Load more Pokémon</button>
+</body>
+</html>
