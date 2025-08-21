@@ -152,17 +152,22 @@ function showPokemonCardHTML(pokemonType,selectedPokemon, pokemonName, index) {
     const chartCanvasID = `myChart${index}`;
     return `
         <div class="centerPokemonCard">
-            <button class="closePokemonCardButton" onclick="closePokemonCard(${index})">CLOSE</button>
+            
             <div class="pokeCardBig ${pokemonType}">
+                <div class="buttonContainer">
+                    <button class="changeCardButton" onclick="previousCard()">&#8592 </button>
+                    <button class="closePokemonCardButton" onclick="closePokemonCard(${index})">&#10005;</button>
+                    <button class="changeCardButton" onclick="nextCard()"> &#8594</button>
+                </div>
                 <h1>${pokemonName}</h1>
+                <div class="pokemonImageContainer">
                 <img class="pokemonImageBig" src="${selectedPokemon.sprites.other.showdown.front_default}">
+                </div>
                 <div class="types">${typesHTML}</div>
-                <canvas id="${chartCanvasID}" class="chartContainerBig"></canvas>
+                <canvas id="${chartCanvasID}" class="chartContainerBig">
+                </canvas>
             </div>
-            <div class="buttonContainer">
-                <button class="changeCardButton" onclick="previousCard()">&#8592 PREV</button>
-                <button class="changeCardButton" onclick="nextCard()">NEXT &#8594</button>
-            </div>
+         
         </div>
     `;
 }

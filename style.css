@@ -11,6 +11,11 @@ body {
 
 h1 {
     color: rgb(255, 255, 255);
+    text-shadow:
+     -2px -2px 0 black,
+      2px -2px 0 black,
+     -2px  2px 0 black,
+      2px  2px 0 black;
     padding-top: 24px;
 }
 
@@ -97,7 +102,6 @@ h1 {
 
 .loadMoreButton:hover {
     background-color: #f53636;
-
 }
 
 .searchPokemon{
@@ -142,16 +146,14 @@ h1 {
 }
 
 .closePokemonCardButton {
-    margin-top: 16px;
     position: relative;
 }
 
 .changeCardButton {
-    margin-top: 32px;
     border: 2px solid white;
     color: white;
-    background-color: #C01C1C;
-    padding: 16px;
+    background-color: #c01c1c00;
+    padding: 12px;
     border-radius: 24px;
     font-weight: bold;
     cursor: pointer;
@@ -160,8 +162,8 @@ h1 {
 .closePokemonCardButton {
     border: 2px solid white;
     color: white;
-    background-color: #C01C1C;
-    padding: 16px;
+    background-color: #c01c1c00;
+    padding: 13px;
     border-radius: 24px;
     font-weight: bold;
     cursor: pointer;
@@ -253,6 +255,11 @@ h1 {
     color: rgb(255, 255, 255);
     margin-top: 52px;
     margin-bottom: 32px;
+        text-shadow:
+     -1px -1px 0 black,
+      1px -1px 0 black,
+     -1px  1px 0 black,
+      1px  1px 0 black;
 }
 
 .chartContainer {
@@ -284,7 +291,7 @@ h1 {
 }
     
 .grass{
-    background-color:#3ced96;
+    background-color:#267f54;
 }
 
 .poison {
@@ -390,13 +397,14 @@ h1 {
 
 @media (max-width: 430px) {
     .pokeCardBig {
-        height: 480px;
-        width: 230px;
+        height: 600px;
+        width: 300px;
+        margin: 0px;
     }
 
     .chartContainerBig {
-        width: 280px !important;
-        height: 280px;
+        width: 348px !important;
+        height: 280px !important;
     }
 
     .pokemonImageBig {
@@ -422,4 +430,26 @@ h1 {
   
 ::-webkit-scrollbar-thumb:hover {
     background: #b30000; 
+}
+
+.pokemonImageContainer {
+    width: 200px; /* feste Breite */
+    height: 200px; /* feste Höhe */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.pokemonImageContainer img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.buttonContainer {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 16px;
 }
