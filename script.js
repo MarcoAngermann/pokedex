@@ -108,18 +108,19 @@ window.addEventListener('scroll', () => {
 });
 
 function showPokemonCard(index) {
-    let selectedPokemon = searchedPokemon.length > 0 ? searchedPokemon[index] : currentPokemon[index];
+    const activeArray = searchedPokemon.length > 0 ? searchedPokemon : currentPokemon;
+    currentCardIndex = index;
+
+    let selectedPokemon = activeArray[index];
     if (!selectedPokemon) return;
 
     const pokemonName = capitalizeFirstLetter(selectedPokemon.name);
     const showPokemonCardContainer = document.getElementById('showPokemonCardContainer');
     const pokemonType = selectedPokemon.types[0].type.name;
-    const pokemonArray = searchedPokemon.length > 0 ? searchedPokemon : currentPokemon;
-    const pokemonIndex = pokemonArray.indexOf(selectedPokemon);
-    showPokemonCardContainer.innerHTML = showPokemonCardHTML(pokemonType, selectedPokemon, pokemonName, pokemonIndex);
+    showPokemonCardContainer.innerHTML = showPokemonCardHTML(pokemonType, selectedPokemon, pokemonName, index);
     showPokemonCardContainer.classList.add('d-block');
     document.body.style.overflow = 'hidden';
-    renderChart(`myChart${pokemonIndex}`, selectedPokemon.stats.map(stat => stat.base_stat));
+    renderChart(`myChart${index}`, selectedPokemon.stats.map(stat => stat.base_stat));
 }
 
 function showPokemonCardHTML(pokemonType, selectedPokemon, pokemonName, index) {
@@ -176,19 +177,20 @@ function closePokemonCard(i) {
 }
 
 function previousCard() {
-    currentCardIndex = currentCardIndex > 0 ? currentCardIndex - 1 : currentPokemon.length - 1;
-    showCurrentCard();
+    const activeArray = searchedPokemon.length > 0 ? searchedPokemon : currentPokemon;
+    currentCardIndex = currentCardIndex > 0 ? currentCardIndex - 1 : activeArray.length - 1;
+    showPokemonCard(currentCardIndex);
 }
 
 function nextCard() {
-    currentCardIndex = currentCardIndex < currentPokemon.length - 1 ? currentCardIndex + 1 : 0;
-    showCurrentCard();
+    const activeArray = searchedPokemon.length > 0 ? searchedPokemon : currentPokemon;
+    currentCardIndex = currentCardIndex < activeArray.length - 1 ? currentCardIndex + 1 : 0;
+    showPokemonCard(currentCardIndex);
 }
 
 function showCurrentCard() {
     showPokemonCard(currentCardIndex);
 }
-
 
 
 
