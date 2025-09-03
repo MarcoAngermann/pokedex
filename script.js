@@ -4,10 +4,10 @@ let allPokemon = [];
 let allPokemonLoaded = false;
 let currentCardIndex = 0;
 let offset = 0;
-const limit = 25; // Anzahl der Pokémon, die gleichzeitig geladen werden sollen
+const limit = 25;
 
 async function init() {
-    await loadPokemon(); // Die ersten 25 Pokemon laden
+    await loadPokemon();
 }
 
 async function loadAllPokemon() {
@@ -15,17 +15,9 @@ async function loadAllPokemon() {
     let response = await fetch(url);
     let data = await response.json();
     allPokemon = data.results;
-    let allPromises = [];
-    for (let i = 0; i < allPokemon.length; i++) { // 1. Anfragen vorbereiten
-        let pokemonUrl = allPokemon[i].url;
-        allPromises.push(fetch(pokemonUrl));
-    }
-    let allPokemonResponses = await Promise.all(allPromises); // 2. Alles parallel ausführen
-    for(let i = 0; i < allPokemonResponses.length; i++) { // 3. Auswerten 
-        let pokemonResponse = allPokemonResponses[i];
-        let pokemonData = await pokemonResponse.json();
-        allPokemon[i] = pokemonData; 
-    }
+    let allPromises = allPokemon.map(p => fetch(p.url).then(res => res.json()));
+    let allPokemonData = await Promise.all(allPromises);
+    allPokemon = allPokemonData;
 }
 
 async function loadPokemon() {
@@ -41,12 +33,9 @@ async function loadPokemon() {
 }
 
 async function fetchAndStorePokemonData(pokemonList) {
-    for (let i = 0; i < pokemonList.length; i++) {
-        let pokemonUrl = pokemonList[i].url;
-        let pokemonResponse = await fetch(pokemonUrl);
-        let pokemonData = await pokemonResponse.json();
-        currentPokemon.push(pokemonData);
-    }
+    const promises = pokemonList.map(p => fetch(p.url).then(res => res.json()));
+    const results = await Promise.all(promises);
+    currentPokemon.push(...results);
 }
 
 function extractStats(pokemon) {
@@ -54,12 +43,7 @@ function extractStats(pokemon) {
 }
 
 function pokemonStats(pokemonArray) {
-    const statsArray = [];
-    for (let i = 0; i < pokemonArray.length; i++) {
-        const stats = extractStats(pokemonArray[i]);
-        statsArray.push(stats);
-    }
-    return statsArray;
+    return pokemonArray.map(p => extractStats(p));
 }
 
 function renderPokemonInfo(type) {
@@ -74,17 +58,18 @@ function renderPokemonInfo(type) {
 function renderPokemonCard(container, pokemon, index) {
     const pokemonName = capitalizeFirstLetter(pokemon.name);
     const typesHTML = generateTypesHTML(pokemon);
-    const pokemonCardHTML = generatePokemonCardHTML(pokemon.types[0].type.name, pokemonName, pokemon.sprites.other.dream_world.front_default, pokemon.name, typesHTML, index);
+    const imageUrl = pokemon.sprites.other.dream_world.front_default || pokemon.sprites.front_default;
+    const pokemonCardHTML = generatePokemonCardHTML(pokemon.types[0].type.name, pokemonName, imageUrl, pokemon.name, typesHTML, index);
     container.innerHTML += pokemonCardHTML;
 }
 
-function capitalizeFirstLetter(string) { // Funktion zum Großschreiben des ersten Buchstabens eines Strings
+function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 function generateTypesHTML(pokemon) {
     let typesHTML = '';
-    if (pokemon.types && pokemon.types.length > 0) { // Überprüfen, ob pokemon.types definiert und nicht leer ist
+    if (pokemon.types && pokemon.types.length > 0) {
         for (let j = 0; j < pokemon.types.length; j++) {
             typesHTML += `<p class="${pokemon.types[j].type.name}">${pokemon.types[j].type.name}</p>`;
         }
@@ -92,7 +77,7 @@ function generateTypesHTML(pokemon) {
     return typesHTML;
 }
 
-function generatePokemonCardHTML(pokemonType, pokemonName, imageUrl, altText, typesHTML, index) { // Funktion zum Generieren des HTML-Codes für eine einzelne Pokémon-Karte
+function generatePokemonCardHTML(pokemonType, pokemonName, imageUrl, altText, typesHTML, index) {
     return `
         <div onclick="showPokemonCard(${index})" class="pokeCard ${pokemonType}">
             <h1>${pokemonName}</h1>
@@ -103,56 +88,46 @@ function generatePokemonCardHTML(pokemonType, pokemonName, imageUrl, altText, ty
         </div>
     `;
 }
+
 function loadMorePokemon() {
-    const loader = document.getElementById('loader'); 
-    if (loader.style.display !== 'flex') { // Überprüfe, ob der Ladebildschirm bereits angezeigt wird
-        loader.style.display = 'flex'; // Wenn nicht, zeige den Ladebildschirm an
-        offset += limit; // Erhöhe den Offset-Wert, um die nächsten Pokémon zu laden
-        loadPokemon().then(() => {  // Lade die Pokémon und verstecke den Ladebildschirm, sobald das Laden abgeschlossen ist
+    const loader = document.getElementById('loader');
+    if (loader.style.display !== 'flex') {
+        loader.style.display = 'flex';
+        offset += limit;
+        loadPokemon().then(() => {
             loader.style.display = 'none';
         });
     }
 }
 
-// Füge ein Event-Listener für das Scrollen hinzu
+// Früheres Scroll-Triggering für flüssigeres Laden
 window.addEventListener('scroll', () => {
-    // Überprüfe, ob der Benutzer zum unteren Rand der Seite gescrollt hat
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
-        // Wenn ja, lade mehr Pokémon
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
         loadMorePokemon();
     }
 });
 
 function showPokemonCard(index) {
-    let selectedPokemon;
-    if (searchedPokemon.length > 0) {
-        selectedPokemon = searchedPokemon[index];
-    } else {
-        selectedPokemon = currentPokemon[index];
-    }
-    
-    if (!selectedPokemon) {
-        return; // Fehlerbehandlung, falls das ausgewählte Pokemon nicht gefunden wird
-    }
-    
-    const pokemonName = selectedPokemon.name.charAt(0).toUpperCase() + selectedPokemon.name.slice(1);
+    let selectedPokemon = searchedPokemon.length > 0 ? searchedPokemon[index] : currentPokemon[index];
+    if (!selectedPokemon) return;
+
+    const pokemonName = capitalizeFirstLetter(selectedPokemon.name);
     const showPokemonCardContainer = document.getElementById('showPokemonCardContainer');
     const pokemonType = selectedPokemon.types[0].type.name;
     const pokemonArray = searchedPokemon.length > 0 ? searchedPokemon : currentPokemon;
-    const pokemonIndex = pokemonArray.indexOf(selectedPokemon); // Index im entsprechenden Array finden
+    const pokemonIndex = pokemonArray.indexOf(selectedPokemon);
     showPokemonCardContainer.innerHTML = showPokemonCardHTML(pokemonType, selectedPokemon, pokemonName, pokemonIndex);
     showPokemonCardContainer.classList.add('d-block');
     document.body.style.overflow = 'hidden';
     renderChart(`myChart${pokemonIndex}`, selectedPokemon.stats.map(stat => stat.base_stat));
 }
 
-
-function showPokemonCardHTML(pokemonType,selectedPokemon, pokemonName, index) {
-    const typesHTML = generateTypesHTML(selectedPokemon); // Rufe generateTypesHTML auf, um typesHTML zu erhalten
+function showPokemonCardHTML(pokemonType, selectedPokemon, pokemonName, index) {
+    const typesHTML = generateTypesHTML(selectedPokemon);
     const chartCanvasID = `myChart${index}`;
+    const imageUrl = selectedPokemon.sprites.other.showdown.front_default || selectedPokemon.sprites.front_default;
     return `
         <div class="centerPokemonCard">
-            
             <div class="pokeCardBig ${pokemonType}">
                 <div class="buttonContainer">
                     <button class="changeCardButton" onclick="previousCard()">&#8592 </button>
@@ -161,13 +136,11 @@ function showPokemonCardHTML(pokemonType,selectedPokemon, pokemonName, index) {
                 </div>
                 <h1>${pokemonName}</h1>
                 <div class="pokemonImageContainer">
-                <img class="pokemonImageBig" src="${selectedPokemon.sprites.other.showdown.front_default}">
+                    <img class="pokemonImageBig" src="${imageUrl}">
                 </div>
                 <div class="types">${typesHTML}</div>
-                <canvas id="${chartCanvasID}" class="chartContainerBig">
-                </canvas>
+                <canvas id="${chartCanvasID}" class="chartContainerBig"></canvas>
             </div>
-         
         </div>
     `;
 }
@@ -178,8 +151,10 @@ async function searchPokemon() {
     loader.style.display = 'flex';
     if (searchInput.length >= 3) {
         try {
-            await loadAllPokemon();
-            allPokemonLoaded = true;
+            if (!allPokemonLoaded) {
+                await loadAllPokemon();
+                allPokemonLoaded = true;
+            }
             searchedPokemon = allPokemon.filter(pokemon => pokemon.name.toLowerCase().startsWith(searchInput));
             renderPokemonInfo('search');
         } catch (error) {
@@ -188,39 +163,30 @@ async function searchPokemon() {
             loader.style.display = 'none';
         }
     } else {
-        searchedPokemon = []; // Zurücksetzen des searchedPokemon-Arrays, wenn die Suche gelöscht wird
+        searchedPokemon = [];
         renderPokemonInfo();
         loader.style.display = 'none';
     }
 }
 
-
-function closePokemonCard(i){
+function closePokemonCard(i) {
     const showPokemonCardContainer = document.getElementById('showPokemonCardContainer');
     showPokemonCardContainer.classList.remove('d-block');
-    document.body.style.overflow = 'auto'; // Scrollbar wieder aktivieren
+    document.body.style.overflow = 'auto';
 }
 
 function previousCard() {
-    if (currentCardIndex > 0) { // Überprüfen, ob es eine vorherige Karte gibt
-        currentCardIndex--; // Den Index der aktuellen Karte um 1 verringern
-    } else {
-        currentCardIndex = currentPokemon.length - 1; // Falls der Index bereits 0 ist, zurück zum letzten Index (letztes Pokemon)
-    }
+    currentCardIndex = currentCardIndex > 0 ? currentCardIndex - 1 : currentPokemon.length - 1;
     showCurrentCard();
 }
 
 function nextCard() {
-    if (currentCardIndex < currentPokemon.length - 1) { // Überprüfen, ob es eine nächste Karte gibt
-        currentCardIndex++; // Den Index der aktuellen Karte um 1 erhöhen
-    } else {
-        currentCardIndex = 0; // Falls der Index bereits das letzte Pokemon ist, zurück zum ersten Index (erstes Pokemon)
-    }
+    currentCardIndex = currentCardIndex < currentPokemon.length - 1 ? currentCardIndex + 1 : 0;
     showCurrentCard();
 }
 
 function showCurrentCard() {
-    showPokemonCard(currentCardIndex); // Zeige die Karte mit dem aktualisierten Index an
+    showPokemonCard(currentCardIndex);
 }
 
 
